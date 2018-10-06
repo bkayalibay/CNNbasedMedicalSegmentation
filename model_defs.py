@@ -1012,6 +1012,181 @@ res_fcn_concat_rot = ModelDef(
     optimizer=('adam', {'step_rate': 2e-5})
 )
 
+
+cpu_friendly = ModelDef(
+    alpha=alpha5,
+    layer_vars=[
+        {'i':0, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 8},                         # 128*128*96*8 - 3
+        {'i':1, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':2, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':3, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 8, 'stride': (2, 2, 2)},    # 64*64*48*8 - 5
+
+        {'i':4, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':5, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':6, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 16},                        # 64*64*48*16 - 9
+        {'i':7, 'type': 'shortcut', 'src': 3, 'dst': 6},
+        {'i':8, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':9, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':10, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 32, 'stride': (2, 2, 2)},   # 32*32*24*32 - 13
+
+        {'i':11, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':12, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':13, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 32}, # 21
+        {'i':14, 'type': 'shortcut', 'src': 10, 'dst': 13},
+        {'i':15, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':16, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':17, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 64, 'stride': (2, 2, 2)},   # 16*16*12*64 - 29
+
+        {'i':18, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':19, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':20, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 64},                        # 16*16*12*64 - 45
+        {'i':21, 'type': 'shortcut', 'src': 17, 'dst': 20},
+        {'i':22, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':23, 'type': 'non_linearity', 'transfer': 'prelu'},                         # 16*16*12*128
+
+        {'i':24, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 32},
+        {'i':25, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':26, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':27, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 32, 'up': (2, 2, 2)},     # 32*32*24*32 - 53
+        {'i':28, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':29, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':30, 'type': 'concat', 'left':16, 'right':29},                              # 32*32*24*64
+        {'i':31, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 64},                        # 32*32*24*64 - 61
+        {'i':32, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':33, 'type': 'non_linearity', 'transfer': 'prelu'},
+
+        {'i':34, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 32},                        # 32*32*24*16
+        {'i':35, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':36, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':37, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 16, 'up': (2, 2, 2)},     # 64*64*48*16 - 65
+        {'i':38, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':39, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':40, 'type': 'concat', 'left': 9, 'right': 39},                             # 64*64*48*32
+        {'i':41, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 32},                        # 64*64*48*32 - 69
+        {'i':42, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':43, 'type': 'non_linearity', 'transfer': 'prelu'},
+
+        {'i':44, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 16},                         # 64*64*48*8
+        {'i':45, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':46, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':47, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 8, 'up': (2, 2, 2)}, # 71
+        {'i':48, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':49, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':50, 'type': 'concat', 'left': 2, 'right': 49},                             # 128*128*96*16
+        {'i':51, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 16}, # 73
+        {'i':52, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':53, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':54, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 5},                         # 128*128*96*2
+
+        {'i':55, 'type': 'skip', 'src': 33},
+        {'i':56, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 5},
+        {'i':57, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 5, 'up': (2, 2, 2)},
+        {'i':58, 'type': 'skip', 'src': 43},
+        {'i':59, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 5},
+        {'i':60, 'type': 'shortcut', 'src': 57, 'dst': 59},
+        {'i':61, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 5, 'up': (2, 2, 2)},
+        {'i':62, 'type': 'shortcut', 'src': 54, 'dst': 61}
+    ],
+    batchnorm=True,
+    loss_id=ash.tanimoto,
+    out_transfer=ash.TransFun(ash.tensor_softmax, 5),
+    size_reduction=0,
+    bn_version='new',
+    regularize=False,
+    l1=None, # val like 30171.708
+    l2=None,  #0.001 val like 736.552
+    perform_transform=random_geometric_transformation,
+    optimizer=('adam', {'step_rate':5e-5})
+)
+
+
+cpu_friendly_small = ModelDef(
+    alpha=alpha5,
+    layer_vars=[
+        {'i':0, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1},                         # 128*128*96*8 - 3
+        {'i':1, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':2, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':3, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1, 'stride': (2, 2, 2)},    # 64*64*48*8 - 5
+
+        {'i':4, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':5, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':6, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1},                        # 64*64*48*16 - 9
+        {'i':7, 'type': 'shortcut', 'src': 3, 'dst': 6},
+        {'i':8, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':9, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':10, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1, 'stride': (2, 2, 2)},   # 32*32*24*32 - 13
+
+        {'i':11, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':12, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':13, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1}, # 21
+        {'i':14, 'type': 'shortcut', 'src': 10, 'dst': 13},
+        {'i':15, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':16, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':17, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1, 'stride': (2, 2, 2)},   # 16*16*12*64 - 29
+
+        {'i':18, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':19, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':20, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1},                        # 16*16*12*64 - 45
+        {'i':21, 'type': 'shortcut', 'src': 17, 'dst': 20},
+        {'i':22, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':23, 'type': 'non_linearity', 'transfer': 'prelu'},                         # 16*16*12*128
+
+        {'i':24, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 1},
+        {'i':25, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':26, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':27, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 1, 'up': (2, 2, 2)},     # 32*32*24*32 - 53
+        {'i':28, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':29, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':30, 'type': 'concat', 'left':16, 'right':29},                              # 32*32*24*64
+        {'i':31, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1},                        # 32*32*24*64 - 61
+        {'i':32, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':33, 'type': 'non_linearity', 'transfer': 'prelu'},
+
+        {'i':34, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 1},                        # 32*32*24*16
+        {'i':35, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':36, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':37, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 1, 'up': (2, 2, 2)},     # 64*64*48*16 - 65
+        {'i':38, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':39, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':40, 'type': 'concat', 'left': 9, 'right': 39},                             # 64*64*48*32
+        {'i':41, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1},                        # 64*64*48*32 - 69
+        {'i':42, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':43, 'type': 'non_linearity', 'transfer': 'prelu'},
+
+        {'i':44, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 1},                         # 64*64*48*8
+        {'i':45, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':46, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':47, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 1, 'up': (2, 2, 2)}, # 71
+        {'i':48, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':49, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':50, 'type': 'concat', 'left': 2, 'right': 49},                             # 128*128*96*16
+        {'i':51, 'type': 'conv', 'fs': (3, 3, 3), 'nkerns': 1}, # 73
+        {'i':52, 'type': 'batch_norm', 'alpha': alpha},
+        {'i':53, 'type': 'non_linearity', 'transfer': 'prelu'},
+        {'i':54, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 5},                         # 128*128*96*2
+
+        {'i':55, 'type': 'skip', 'src': 33},
+        {'i':56, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 5},
+        {'i':57, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 5, 'up': (2, 2, 2)},
+        {'i':58, 'type': 'skip', 'src': 43},
+        {'i':59, 'type': 'conv', 'fs': (1, 1, 1), 'nkerns': 5},
+        {'i':60, 'type': 'shortcut', 'src': 57, 'dst': 59},
+        {'i':61, 'type': 'deconv', 'fs': (3, 3, 3), 'nkerns': 5, 'up': (2, 2, 2)},
+        {'i':62, 'type': 'shortcut', 'src': 54, 'dst': 61}
+    ],
+    batchnorm=True,
+    loss_id=ash.tanimoto,
+    out_transfer=ash.TransFun(ash.tensor_softmax, 5),
+    size_reduction=0,
+    bn_version='new',
+    regularize=False,
+    l1=None, # val like 30171.708
+    l2=None,  #0.001 val like 736.552
+    perform_transform=random_geometric_transformation,
+    optimizer=('adam', {'step_rate':5e-5})
+)
+
+
 ready_models = {
     'ez': ez,
     'single': single,
@@ -1032,6 +1207,8 @@ ready_models = {
     'res_hand_section': res_hand_section,
     'res_hand_section_concat': res_hand_section_concat,
     'res_brain_section_concat': res_brain_section_concat,
+    'cpu_friendly': cpu_friendly,
+    'cpu_friendly_small': cpu_friendly_small,
 
     # TRANSFORM TESTS:
     'res_fcn_add_rot': res_fcn_add_rot,

@@ -13,13 +13,19 @@ import matplotlib.pyplot as plt
 from skimage import color
 
 import h5py
-import gnumpy
 
 from climin import mathadapt as ma
 from climin.util import iter_minibatches
 
 from breze.arch.util import lookup
 from breze.arch.component import transfer as _transfer
+
+
+try:
+    import gnumpy
+except:
+    import _gnumpy as gnumpy
+
 
 def dice_demo_(seg, gt):
     dice = np.sum(2 * seg * gt)

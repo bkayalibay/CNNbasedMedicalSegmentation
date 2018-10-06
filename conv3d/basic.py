@@ -21,7 +21,7 @@ def elu(inpt):
     Exponential linear unit, see: arxiv:1511.07289v5 [cs.LG]
     '''
     return (inpt > 0) * inpt  + (inpt <= 0) * (T.exp(inpt) - 1)
-    
+
 def tensor_softmax(inpt, n_classes=2):
     output = inpt.dimshuffle(0, 3, 4, 1, 2)
     shuffled_shape = output.shape
@@ -52,7 +52,7 @@ def stretch_axis(a, axis, factor, original_shape):
     out = T.set_subtensor(out_second[indices_second], a[indices_take_second])
 
     return out
-    
+
 class Conv3d(Layer):
     def __init__(self, inpt, inpt_height, inpt_width,
                  inpt_depth, n_inpt, filter_height,
@@ -94,7 +94,7 @@ class Conv3d(Layer):
             self.output_height = inpt_height / strides[0]
             self.output_width = inpt_width / strides[1]
             self.output_depth = inpt_depth / strides[2]
-            
+
         if not self.output_height > 0:
             raise ValueError('inpt height smaller than filter height')
         if not self.output_width > 0:
@@ -958,7 +958,7 @@ class FlexConcatenate(Layer):
 
     def get_output(self):
         return self.output
-        
+
 class OldBN(Layer):
     def __init__(self, inpt, inpt_height,
                  inpt_width, inpt_depth,

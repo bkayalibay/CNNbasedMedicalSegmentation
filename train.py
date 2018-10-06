@@ -30,7 +30,6 @@ import argparse
 
 import matplotlib.pyplot as plt
 import numpy as np
-import gnumpy
 import h5py
 
 import climin.stops
@@ -41,6 +40,13 @@ from ash import PocketTrainer
 from model_defs import get_model
 
 from conv3d.model import SequentialModel
+
+
+try:
+    import gnumpy
+except:
+    import _gnumpy as gnumpy
+
 
 def make_parser():
     parser = argparse.ArgumentParser(description='Train model on data.')
@@ -252,13 +258,14 @@ def save_demo(coach, train_dir, size_reduction):
             gt=test_y[i], size_reduction=size_reduction,
             im_name=im_name
         )
+        this_dice_value = [float(d) for d in this_dice_value]
         dice_values.append(this_dice_value)
 
     mean_dice = 0
     for d in dice_values:
         mean_dice += d[0]
     mean_dice = mean_dice * 1./len(dice_values)
-    dice_log = {'mean_dice': mean_dice, 'dice_values': dice_values}
+    dice_log = {'mean_dice': float(mean_dice), 'dice_values': dice_values}
     dice_log_path = os.path.join(train_dir, 'dice.json')
     with open(dice_log_path, 'w') as f:
         json.dump(dice_log, f)

@@ -468,7 +468,7 @@ class ConvNet3d(SupervisedModel):
 
 
 class Lenet3d(SupervisedModel):
-    
+
     def __init__(self, image_height, image_width, image_depth,
                  n_channel, n_hiddens_conv, filter_shapes, pool_shapes,
                  n_hiddens_full, n_output, hidden_transfers_conv,
@@ -516,7 +516,7 @@ class Lenet3d(SupervisedModel):
         ))
 
         parameters = ParameterSet()
-       
+
         self.lenet = cnn3d.Lenet3d(
             inpt, self.image_height,
             self.image_width, self.image_depth,

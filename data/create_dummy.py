@@ -10,7 +10,7 @@ DATA_HOME = 'datasets'
 if not os.path.exists(DATA_HOME):
 	os.makedirs(DATA_HOME)
 
-ds = (64, 80, 72)
+ds = (32, 32, 32)
 dp = np.prod(np.array(ds))
 n_chans = 4
 x_size = 2
