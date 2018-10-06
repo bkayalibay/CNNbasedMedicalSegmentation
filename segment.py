@@ -1,16 +1,24 @@
-# coding: utf-8 
+# coding: utf-8
+import sys
 import h5py
 import cPickle as pickle
 import os
 import json
+import SimpleITK as sitk
 
 import numpy as np
-import gnumpy
 
 import ash
 import brain_data_scripts as bds
 from model_defs import get_model
 from conv3d.model import SequentialModel
+
+
+try:
+    import gnumpy
+except:
+    import _gnumpy as gnumpy
+
 
 def load_mhas_as_dict(path):
     """
@@ -35,7 +43,7 @@ def load_mhas_as_dict(path):
     └── VSD.Brain.XX.O.MR_T2.54515
         ├── License_CC_BY_NC_SA_3.0.txt
         └── VSD.Brain.XX.O.MR_T2.54515.mha
-    
+
     The method will return a tuple dictionary with the modalities
     as keys and numpy ndarrays as values.
     """
@@ -43,12 +51,12 @@ def load_mhas_as_dict(path):
 
 
 def load_dict_as_inputable_ndarray(im):
-    """"   
+    """"
     The method will take a dictionary like the one returned by
     load_mhas_as_dict and return a tuple (image, slices)
     where image is a 5D numpy array with dimensions
     corresponding to: (1, depth, n_chans, height, width)
-    and slices will be used to insert the segmentation into 
+    and slices will be used to insert the segmentation into
     a volume of the same size as the original image.
 
     We need this because the network is trained on images of size
@@ -66,7 +74,7 @@ def load_dict_as_inputable_ndarray(im):
 
 def build_net(model_folder, model_code, n_classes, train_size, inpt_h, inpt_w, inpt_d, n_channels):
     """
-    Takes everything that defines a trained neural network 
+    Takes everything that defines a trained neural network
     in our setting and returns a function predict that accepts
     a numpy array as input and returns the segmentation corresponding
     to it.
@@ -190,7 +198,7 @@ def segment(path, model_folder, model_code, n_classes=5):
     Segments an image using a trained neural network.
     Parameters:
         path: path of a directory containing .mha files in
-                its subdirectories. 
+                its subdirectories.
                 This is specified in: load_mhas_as_dict
         model_folder: path to a directory containing the training results
                       of the network.
@@ -198,14 +206,20 @@ def segment(path, model_folder, model_code, n_classes=5):
                       net architecture in model_defs.py
     """
     im_dict = load_mhas_as_dict(path)
-    
+
     return segment_dict(im_dict, model_folder, model_code, n_classes)
 
-if __name__ == '__main__':
-    import matplotlib.pyplot as plt
 
-    seg = segment('BRATS2015_Training/HGG/brats_2013_pat0001_1',
-                  'dummy45', 'fcn_rffc4')
-    for depth_slice in seg:
-        bds.vis_col_im(im=np.ones_like(depth_slice), gt=depth_slice)
-    
+def store_mha_result(arr):
+    itk_image = sitk.GetImageFromArray(arr)
+    sitk.WriteImage(itk_image, "result.mha")
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print("Usage: python segment.py [path-to-patient-dir]")
+        sys.exit(1)
+    else:
+        patient_dir = sys.argv[1]
+        seg = segment(patient_dir, 'model', 'cpu_friendly')
+        store_mha_result(seg)
