@@ -20,6 +20,9 @@ In our paper, we trained our network using:
 python train.py fcn_rffc4 brats_fold0 brats_fold0 600 -ch False
 """
 
+import matplotlib
+matplotlib.use('Agg')
+
 #import break_handling
 import cPickle as pickle
 import json

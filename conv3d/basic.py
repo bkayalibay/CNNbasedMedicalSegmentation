@@ -766,13 +766,13 @@ class BatchNorm(Layer):
         self._setup_running_metrics(self.n_output)
         self.running_mean.default_update = ifelse(
             self.training,
-            (1.0 - self.alpha) * self.running_mean + self.alpha * mean,
-            self.running_mean
+            T.cast((1.0 - self.alpha) * self.running_mean + self.alpha * mean, 'float32'),
+            T.cast(self.running_mean, 'float32')
         )
         self.running_std.default_update = ifelse(
             self.training,
-            (1.0 - self.alpha) * self.running_std + self.alpha * std,
-            self.running_std
+            T.cast((1.0 - self.alpha) * self.running_std + self.alpha * std, 'float32'),
+            T.cast(self.running_std, 'float32')
         )
 
         # This will be optimized away, but ensures the running mean and the running std get updated.
@@ -780,8 +780,8 @@ class BatchNorm(Layer):
         mean += 0 * self.running_mean
         std += 0 * self.running_std
 
-        use_mean = ifelse(self.training, mean, self.running_mean)
-        use_std = ifelse(self.training, std, self.running_std)
+        use_mean = ifelse(self.training, T.cast(mean, 'float32'), T.cast(self.running_mean, 'float32'))
+        use_std = ifelse(self.training, T.cast(std, 'float32'), T.cast(self.running_std, 'float32'))
 
         use_mean = use_mean.dimshuffle('x', 'x', 0, 'x', 'x')
         use_std = use_std.dimshuffle('x', 'x', 0, 'x', 'x')
