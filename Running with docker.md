@@ -1,5 +1,11 @@
 ### Running with docker
 
+Make sure you are on branch `cpu-friendly`:
+
+```
+git checkout cpu-friendly
+```
+
 To run with docker, first build the docker image:
 
 ```
@@ -16,7 +22,7 @@ docker run -v $PWD:/cnnbased:rw cnnbased bash -c "cd cnnbased; ./train_model.sh"
 
 We are mounting the current working directory and giving read-write access so that the script has access to the BRATS 2015 data. This command will do the following:
 
-* Parse the patient files in `BRATS2015_Training/.` and construct a the file `data/datasets/brats_fold0.hdf5`. This is the data set that will be used during training
+* Parse the patient files in `BRATS2015_Training/.` and construct the file `data/datasets/brats_fold0.hdf5`. This is the data set that will be used during training
 * Start the training script, which will train the neural network for 600 epochs
 * Save the final model parameters in the directory `models/model`
 
